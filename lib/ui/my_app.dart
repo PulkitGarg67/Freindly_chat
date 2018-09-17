@@ -10,7 +10,7 @@ class my_app extends StatefulWidget {
   }
 }
 
-class ChatScreenState extends State<my_app> {
+class ChatScreenState extends State<my_app> with TickerProviderStateMixin {
 
   final TextEditingController _textController =
   new TextEditingController();
@@ -18,10 +18,14 @@ class ChatScreenState extends State<my_app> {
 
   void _handleSubmitted(String text) {
     _textController.clear();
-    ChatMessage message = new ChatMessage(text: text,);
+
+    ChatMessage message = new ChatMessage(text: text, animationController:
+    new AnimationController(
+        vsync: this, duration: new Duration(milliseconds: 700)));
     setState(() {
       _messages.insert(0, message);
     });
+    message.animationController.forward();
   }
 
   Widget _buildTextComposer() {
@@ -79,4 +83,12 @@ class ChatScreenState extends State<my_app> {
         )
     );
   }
+
+  @override
+  void dispose() {
+    for (ChatMessage message in _messages)
+      message.animationController.dispose();
+    super.dispose();
+  }
+
 }
