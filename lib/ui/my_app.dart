@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/cupertino.dart';
 import './message.dart';
 
 class my_app extends StatefulWidget {
@@ -15,10 +15,13 @@ class ChatScreenState extends State<my_app> with TickerProviderStateMixin {
   final TextEditingController _textController =
   new TextEditingController();
   final List<ChatMessage> _messages = <ChatMessage>[];
+  bool _isComposing = false;
 
   void _handleSubmitted(String text) {
     _textController.clear();
-
+    setState(() {
+      _isComposing = false;
+    });
     ChatMessage message = new ChatMessage(text: text, animationController:
     new AnimationController(
         vsync: this, duration: new Duration(milliseconds: 700)));
@@ -42,12 +45,28 @@ class ChatScreenState extends State<my_app> with TickerProviderStateMixin {
                 onSubmitted: _handleSubmitted,
                 decoration:
                 new InputDecoration.collapsed(hintText: "Send a message"),
+                onChanged: (String text) {
+                  setState(() {
+                    _isComposing = text.length > 0;
+                  });
+                },
               ),
             ),
             new Container(
               margin: new EdgeInsets.symmetric(horizontal: 4.0),
-              child: new IconButton(icon: new Icon(Icons.send),
-                  onPressed: () => _handleSubmitted(_textController.text)),
+                child: Theme
+                    .of(context)
+                    .platform == TargetPlatform.android ?
+                new CupertinoButton(
+                  child: new Text("Send"),
+                  onPressed: _isComposing
+                      ? () => _handleSubmitted(_textController.text)
+                      : null,) :
+                new IconButton(
+                  icon: new Icon(Icons.send),
+                  onPressed: _isComposing ?
+                      () => _handleSubmitted(_textController.text) : null,
+                )
             )
           ])),
     );
